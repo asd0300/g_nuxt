@@ -7,22 +7,31 @@
                         Profile
                     </v-col>
                     <v-col :offset="6">
-                        <div class="d-flex justify-center">
-                            <v-btn>
-                                登入
-                                <v-overlay activator="parent" location-strategy="connected" scroll-strategy="none"
-                                    class="align-center justify-center">
-                                    <v-card class="pa-2">
-                                        <v-sheet width="300" class="mx-auto">
+                        <div>
+                            <v-dialog width="500">
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" text="登入"> </v-btn>
+                                </template>
+
+                                <template v-slot:default="{ isActive }">
+                                    <v-card title="登入">
+                                        <v-card-text>
                                             <v-form @submit.prevent>
                                                 <v-text-field v-model="username" label="username"></v-text-field>
-                                                <v-text-field v-model="password" label="password"></v-text-field>
-                                                <v-btn type="submit" block class="mt-2" @click="login">Submit</v-btn>
+                                                <v-text-field v-model="password" label="password" :type="show1 ? 'text' : 'password'"
+                                                    hint="At least 8 characters"></v-text-field>
+                                                <v-btn type="submit" block class="mt-2" @click="login">輸入</v-btn>
+                                                <v-btn @click="navigateToUserCreate" block class="mt-2">建立帳戶</v-btn>
                                             </v-form>
-                                        </v-sheet>
+                                        </v-card-text>
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+
+                                            <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn>
+                                        </v-card-actions>
                                     </v-card>
-                                </v-overlay>
-                            </v-btn>
+                                </template>
+                            </v-dialog>
                         </div>
                     </v-col>
                 </v-row>
@@ -31,13 +40,13 @@
                 <v-form>
                     <v-row>
                         <v-col cols="3" :offset="3" md="4">
-                            <v-text-field v-model="keywordSearch" label="input search words">
+                            <v-text-field v-model="keywordSearch" :rules="[rules.required]" label="input search words">
 
                             </v-text-field>
                         </v-col>
                         <v-col cols="1">
                             <v-icon :key="`icon-${isEditing}`" :color="isEditing ? 'success' : 'info'" :icon="'mdi-magnify'"
-                                size="x-large" @click="Test()"></v-icon>
+                                size="x-large" @click=""></v-icon>
                         </v-col>
                         <v-col>
                             <v-btn append-icon="$vuetify" variant="tonal" @click="advToggle = !advToggle">
@@ -250,6 +259,10 @@
         </div>
         <v-alert v-model="IsEmptyAlert" text="查詢句不可為空" type="error" variant="tonal" closable
             close-label="Close Alert"></v-alert>
+        <v-alert v-model="IsNotLogin" :text="LoginFailMessage" type="error" variant="tonal" closable
+            close-label="Close Alert"></v-alert>
+        <v-alert v-model="IsLogin" text="登入成功" type="success" variant="tonal" closable
+            close-label="Close Alert"></v-alert>
     </div>
 </template>
 
@@ -267,19 +280,10 @@ const test = [
     {
         "indexName": "BookComTw2",
         "searchNum": 163
-    },
-    {
-        "indexName": "BookComTw2",
-        "searchNum": 163
-    },
-    {
-        "indexName": "BookComTw2",
-        "searchNum": 163
-    },
-    {
-        "indexName": "BookComTw2",
-        "searchNum": 163
     }]
+const IsLogin = ref(false)
+const IsNotLogin = ref(false)
+const LoginFailMessage=ref("")
 const username = ref("")
 const password = ref("")
 const secondSearch = ref("")
@@ -313,149 +317,39 @@ const ruleForm = reactive<RuleForm>({
 const checkIndexPool: { [key: string]: boolean } = {};
 const checkFileTypePool: { [key: string]: boolean } = {};
 
+const rules = {
+    required: (value: any) => !!value || 'Required.',
+    counter: (value: string | any[]) => value.length != 20 || 'Max 20 characters',
+    email: (value: string) => {
+        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return pattern.test(value) || 'Invalid e-mail.'
+    },
+};
+
 //pagination
 const itemsOnPage = ref(1)
 
 //alert
 const IsEmptyAlert = ref(false)
 const alertMessage = ref("")
-
-async function Test() {
-    await useFetch('http://localhost:15693/api/Search')
-}
-
-async function GufonetSearch1(isNewQuery: boolean) {
-    let idSecondSearch = searchStep.value === 2;
-    if (isNewQuery) {
-        itemsOnPage.value = 1;
-    }
-    let query = keywordSearch.value
-    if (query === "") {
-        IsEmptyAlert.value = true
-        alertMessage.value = "查詢句不可為空"
-        return
-    }
-    advSearchToggle(false)  //關閉
-    let tempobj;
-    let json;
-    if (isNewQuery === true) {
-        if (idSecondSearch === false) {
-            secondSearch.value = ""
-        }
-        tempobj = await buildQueryJson();
-        // tempobj.QueryOption['AddHotKeyword'] = '1';
-        // json = JSON.stringify(tempobj)
-    }
-    // else{
-    //     setPagingToSavedRequest();
-    //     json = JSON.stringify(savedRequest.value);
-    // }
-}
-// function setPagingToSavedRequest(){
-//     let pageSize = ruleForm.count
-//     savedRequest.value.Result
-// }
-function hasPermission(functionID: number) {
-    var p = permissions[functionID];
-    return p
-}
-
-async function buildQueryJson() {
-    let querySentence = [];
-    const queryOption: { [key: string]: any } = {}
-    if (hasPermission(10)) {
-        queryOption['StaticsField'] = '$Index$;$FileType$';
-    }
-
-    let resultOption = {
-        'NeedTotalDocNo': '1',
-        'Abstract': '1',
-        'ContentField': '$Index$,$Source$,$Name$,$Title$,$Date$,$FileType$'
-    };
-    //查詢詞
-    let query = keywordSearch.value.trim()
-
-    //排序方式
-    let sortField = selectFilterMode.value
-    if (sortField === "時間") {
-        queryOption['SortField'] = "$Date$:+";
-    }
-    else {
-        queryOption['SortField'] = "$TF$:+";
-    }
-    //檢索模式
-    let searchMode = ruleForm.searchMode;
-    //時間(rangecondition)
-    let rangeCond = '';
-    let dateRange = ruleForm.searchRange;
-    if (dateRange && dateRange !== "all") {
-        let cutDay = new Date();
-        if (dateRange === "M1") {
-            cutDay.setDate(cutDay.getDate() - 30)
-        }
-        else if (dateRange === "HY") {
-            cutDay.setDate(cutDay.getDate() - 180)
-        }
-        else {
-            cutDay.setDate(cutDay.getDate() - 365)
-        }
-
-        if (dateRange !== "A1Y")
-            rangeCond = `($Date$ >= '${cutDay.toLocaleDateString()}')`;
-        else
-            rangeCond = `($Date$ < '${cutDay.toLocaleDateString()}')`;
-    }
-    //每頁比數
-    let pageSize = ruleForm.count
-    itemsOnPage.value = pageSize
-    //檔案格式限制
-    // checkFileTypePool.value = {};
-    // ruleForm.type.forEach((a) => {
-    //     let curType = a;
-    //     if (curType !== 'all') {
-    //         checkFileTypePool[curType] = true;
-    //     }
-    // })
-    //篩選檢索(二次檢索)
-    let isSeconSearch = (searchStep.value === 2);
-    if (isSeconSearch) {
-        let secondQuery = secondSearch.value;
-        if (secondQuery !== "") {
-            query = `${query} and ${secondQuery}`;
-        }
-
-        // // //加上索引限制
-        // sourceCheckList.value.forEach((item) => {
-        //     let indexName = item.label
-        //     let check = item.value
-        //     checkIndexPool[indexName] = check;
-        // })
-        // //加上檔案類型限制
-        // typeCheckList.value.forEach((item) => {
-        //     let curType = item.label;
-        //     let check = item.value;
-        //     checkFileTypePool[curType] = check;
-        // })
-    }
-    // for(let index in checkIndexPool.value){
-    //     let value = checkIndexPool[index]
-    //     if(value){
-    //         querySentence.push('^' + index)
-    //     }
-    // }
-    // let fileTypeArray = [];
-    // for(let fileType in checkFileTypePool.value){
-
-    // }
-}
-async function login(){
-    await useFetch('http://localhost:4000/user/login', {
-        method:'post',
-        body:{
-            name : username,
-            password : password
+async function login() {
+    const { data: responseDatam, error: err } = await useFetch('http://localhost:4000/user/login', {
+        method: 'post',
+        body: {
+            name: username,
+            password: password
         }
     })
+    if (err.value != null) {
+        IsNotLogin.value = true
+        LoginFailMessage.value = err.value.data.error
+        return
+    }
+    IsLogin.value = true
+}
+const router = useRouter();
+const navigateToUserCreate = () =>{
+    router.push('/user')
 }
 //
 function checkFileType(itemFile: any) {
