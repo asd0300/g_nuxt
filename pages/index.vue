@@ -333,7 +333,7 @@ const itemsOnPage = ref(1)
 const IsEmptyAlert = ref(false)
 const alertMessage = ref("")
 async function login() {
-    const { data: responseDatam, error: err } = await useFetch('http://localhost:4000/user/login', {
+    const { data: responseData, error: err } = await useFetch('http://localhost:4000/user/login', {
         method: 'post',
         body: {
             name: username,
@@ -345,6 +345,9 @@ async function login() {
         LoginFailMessage.value = err.value.data.error
         return
     }
+    const token = responseData.data["token"]
+    const cookie = useCookie("token")
+    cookie.value = token
     IsLogin.value = true
 }
 const router = useRouter();
