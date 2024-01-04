@@ -268,6 +268,7 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
+import { type ResponseData} from '~/Interface/SearchInterface'
 const test = [
     {
         "indexName": "BookComTw",
@@ -281,6 +282,7 @@ const test = [
         "indexName": "BookComTw2",
         "searchNum": 163
     }]
+const runtimeCon = useRuntimeConfig()
 const IsLogin = ref(false)
 const IsNotLogin = ref(false)
 const LoginFailMessage=ref("")
@@ -333,7 +335,7 @@ const itemsOnPage = ref(1)
 const IsEmptyAlert = ref(false)
 const alertMessage = ref("")
 async function login() {
-    const { data: responseData, error: err } = await useFetch('http://localhost:4000/user/login', {
+    const { data: responseData, error: err } = await useFetch<ResponseData>(`${runtimeCon.public.hostDev}/user/login`, {
         method: 'post',
         body: {
             name: username,
@@ -345,9 +347,11 @@ async function login() {
         LoginFailMessage.value = err.value.data.error
         return
     }
-    const token = responseData.data["token"]
     const cookie = useCookie("token")
-    cookie.value = token
+    // const count = useCookie("counter",{maxAge:60})
+    // count.value = Math.round(Math.random()*1000)
+    var test = responseData.value?.data.token!
+    cookie.value = test.toString()
     IsLogin.value = true
 }
 const router = useRouter();

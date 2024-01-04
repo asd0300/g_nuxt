@@ -39,3 +39,10 @@ export interface RuleForm {
     resource: string,
     desc: string,
 }
+export interface ResponseData{
+    message: string
+    data: data
+}
+interface data{
+    token: string
+}
