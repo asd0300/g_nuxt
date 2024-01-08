@@ -29,5 +29,14 @@ export default defineNuxtConfig({
     public:{
       hostDev: "http://localhost:4000"
     }
-  }
+  },
+  nitro: {
+      devProxy: {
+          '/api': {
+              target: 'http://127.0.0.1:4000',
+              changeOrigin: true,
+              prependPath: true,
+          },
+      }
+  },
 })

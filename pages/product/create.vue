@@ -32,7 +32,8 @@ const IsSuccessCreate = ref(false)
 const IsFalseCreate = ref(false)
 const price = ref(0)
 const newPrice = ref(0)
-const password = ref("")
+const picBase64 = ref("")
+const picDetailBase64 = ref("")
 const titleName = ref("")
 const rules = {
     required: value => !!value || 'Required.',
@@ -45,17 +46,35 @@ const rules = {
 }
 const previewFiles = (event)=>{
     titleImg.value = event.target.files[0]
+    if(titleImg){
+        picBase64.value = getBase64(titleImg)
+    }
 }
+
+const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+};
 const previewFilesDetail = (event)=>{
     detailPics.value = event.target.files
+    if(detailPics){
+        picDetailBase64.value = getBase64(detailPics)
+    }
 }
 async function Create() {
     console.log("123")
-    const { data: responseData, error: err } = await useFetch('http://localhost:4000/product/create', {
+    const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products`, {
         method: 'post',
         body: {
-            name: username,
-            password: password
+            title: titleName,
+            price: price,
+            newprice: newPrice,
+            titlepic: picBase64,
+            otherpic: picDetailBase64
         }
     })
     if (err.value != null) {
@@ -67,6 +86,7 @@ async function Create() {
     }
 }
 const router = useRouter();
+const config = useRuntimeConfig()
 const navigateToHome = () => {
     router.push('/')
 }
