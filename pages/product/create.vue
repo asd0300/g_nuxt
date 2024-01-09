@@ -67,7 +67,7 @@ const previewFilesDetail = (event)=>{
 }
 async function Create() {
     console.log("123")
-    const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products`, {
+    const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products/`, {
         method: 'post',
         body: {
             title: titleName,
