@@ -12,7 +12,7 @@
                     <v-file-input ref="titleFiles" :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp" placeholder="Title pic"
                         prepend-icon="mdi-camera" label="Title picture" @change="previewFiles"></v-file-input>
                     <v-file-input ref="detailFiles" multiple :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp"
-                        placeholder="detail pic" prepend-icon="mdi-camera" label="detail pictures" @change="previewFilesDetail"></v-file-input>
+                        placeholder="detail pic" prepend-icon="mdi-camera" label="detail pictures" ></v-file-input>
                     <v-btn type="submit" block class="mt-2" @click="Create">Submit</v-btn>
                 </v-form>
                 <v-btn block class="mt-2" @click="navigateToHome">前往首頁</v-btn>
@@ -24,7 +24,7 @@
             close-label="Close Alert"></v-alert>
     </div>
 </template>
-<script setup>
+<script setup lang="ts">
 const titleImg = ref("null")
 const detailPics = ref("null")
 const FalseMessage = ref("")
@@ -35,47 +35,57 @@ const newPrice = ref(0)
 const picBase64 = ref("")
 const picDetailBase64 = ref("")
 const titleName = ref("")
+const file = ref<File | null>(null)
 const rules = {
-    required: value => !!value || 'Required.',
-    volumn: value => !value || !value.length || value[0].size < 2000000 || 'Avatar size should be less than 2 MB!',
-    counter: value => value.length <= 20 || 'Max 20 characters',
-    email: value => {
+    required: (value: any) => !!value || 'Required.',
+    volumn: (value: string | any[]) => !value || !value.length || value[0].size < 2000000 || 'Avatar size should be less than 2 MB!',
+    counter: (value: string | any[]) => value.length <= 20 || 'Max 20 characters',
+    email: (value: string) => {
         const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         return pattern.test(value) || 'Invalid e-mail.'
     },
 }
-const previewFiles = (event)=>{
-    titleImg.value = event.target.files[0]
-    if(titleImg){
-        picBase64.value = getBase64(titleImg)
-    }
+const previewFiles = (event: Event)=>{
+    const [_file] = (event.target as HTMLInputElement).files as FileList;
+    file.value = _file
+    // titleImg.value = event.target.files[0]
+
+    // const reader = new FileReader()
+    //   reader.onload = (event) => {
+    //     var preview= event.target.result
+    //     var thumbnail = event.target.result.split(',')[1] // 获取base64编码
+    // }
+    // reader.readAsDataURL(file)
 }
 
-const getBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-    });
-};
-const previewFilesDetail = (event)=>{
-    detailPics.value = event.target.files
-    if(detailPics){
-        picDetailBase64.value = getBase64(detailPics)
-    }
-}
+// const getBase64 = (file: globalThis.Ref<string>) => {
+//     return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+//         reader.readAsDataURL(file.value);
+//         reader.onload = () => resolve(reader.result);
+//         reader.onerror = (error) => reject(error);
+//     });
+// };
+// const previewFilesDetail = (event: { target: { files: string; }; })=>{
+//     detailPics.value = event.target.files
+//     if(detailPics){
+//         picDetailBase64.value = getBase64(detailPics)
+//     }
+// }
 async function Create() {
+    let formData = new FormData();
+    formData.append('title', titleName.value);
+    formData.append('price', (price.value).toString());
+    formData.append('newprice', (newPrice.value).toString());
+    if(file.value != null){
+        formData.append('titlepic', (file.value).toString());    
+    }
+    formData.append('otherpic',"");
+    
     console.log("123")
     const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products/`, {
         method: 'post',
-        body: {
-            title: titleName,
-            price: price,
-            newprice: newPrice,
-            titlepic: picBase64,
-            otherpic: picDetailBase64
-        }
+        body: formData
     })
     if (err.value != null) {
         IsFalseCreate.value = true
