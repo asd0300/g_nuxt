@@ -3,10 +3,10 @@
         <v-card class="position-absolute d-flex align-center justify-center w-100 h-100">
             <v-sheet width="300" class="mx-auto">
                 <v-form @submit.prevent>
-                    <v-text-field v-model="username" label="email" :rules="[rules.required, rules.counter, rules.email]"></v-text-field>
+                    <v-text-field v-model="email" label="email" :rules="[rules.required, rules.counter, rules.email]"></v-text-field>
                     <v-text-field v-model="password" label="password" :type="show1 ? 'text' : 'password'"
                         hint="At least 8 characters"></v-text-field>
-                    <v-btn type="submit" block class="mt-2" @click="Create">Submit</v-btn>
+                    <v-btn type="submit" block class="mt-2" @click="Login">Submit</v-btn>
                 </v-form>
                 <v-btn  block class="mt-2" @click="navigateToHome">前往首頁</v-btn>
             </v-sheet>
@@ -22,7 +22,9 @@ const FalseMessage = ref("")
 const IsSuccessCreate = ref(false)
 const IsFalseCreate = ref(false)
 const password = ref("")
-const username = ref("")
+const email = ref("")
+const config = useRuntimeConfig()
+const userToken = useCookie('userToken',{maxAge:60 * 60 * 24 * 7})
 const rules = {
     required: value => !!value || 'Required.',
     counter: value => value.length <= 20 || 'Max 20 characters',
@@ -31,20 +33,21 @@ const rules = {
         return pattern.test(value) || 'Invalid e-mail.'
     },
 };
-async function Create() {
-    const { data: responseData, error: err } = await useFetch('http://localhost:4000/user/create', {
+async function Login() {
+    const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/user/login`, {
         method: 'post',
         body: {
-            name: username,
+            email: email,
             password: password
         }
     })
     if(err.value!= null){
         IsFalseCreate.value = true
-        FalseMessage.value = "註冊失敗" + err.value.data.error
+        FalseMessage.value = "登入失敗" + err.value.data.error
     }
     if(responseData.value!=null){
         IsSuccessCreate.value = true
+        userToken.value = responseData.value.jwt
     }
 }
 const router = useRouter();

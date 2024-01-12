@@ -14,15 +14,8 @@
                                 </template>
 
                                 <template v-slot:default="{ isActive }">
-                                    <v-card title="登入">
+                                    <v-card v-show="IsLogin" title="">
                                         <v-card-text>
-                                            <v-form @submit.prevent>
-                                                <v-text-field v-model="username" label="username"></v-text-field>
-                                                <v-text-field v-model="password" label="password" :type="show1 ? 'text' : 'password'"
-                                                    hint="At least 8 characters"></v-text-field>
-                                                <v-btn type="submit" block class="mt-2" @click="login">輸入</v-btn>
-                                                <v-btn @click="navigateToUserCreate" block class="mt-2">建立帳戶</v-btn>
-                                            </v-form>
                                         </v-card-text>
                                         <v-card-actions>
                                             <v-spacer></v-spacer>
@@ -82,18 +75,6 @@
                                     <div>每頁筆數:</div>
                                     <v-select v-model="select" :items="numberArray" item-title="state" item-value="abbr"
                                         persistent-hint return-object single-line></v-select>
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="10">
-                                    <div>檔案格式限縮:</div>
-                                    <v-container fluid>
-                                        <v-row>
-                                            <v-checkbox v-for="itemFile in availableFile" v-model="selected"
-                                                :label="itemFile.label" :value="itemFile.label"
-                                                @change="checkFileType(itemFile)"></v-checkbox>
-                                        </v-row>
-                                    </v-container>
                                 </v-col>
                             </v-row>
                         </v-card-text>
@@ -269,6 +250,15 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import { type ResponseData} from '~/Interface/SearchInterface'
+import jwt from 'jsonwebtoken'
+onMounted(async () => {
+    GetUserName()
+});
+function GetUserName(){
+    var userToken = useCookie("userToken")
+    const decodedToken = jwt.verify(userToken, "your-secret-key");
+
+}
 const test = [
     {
         "indexName": "BookComTw",
@@ -296,26 +286,11 @@ const select = ref(1)
 const selected = ref<String[]>([])
 const typeCheckList = ref<String[]>([])
 const sourceCheckList = ref<String[]>([])
-const open = ref<String[]>(['Users'])
 const IsSearchSuccessResponse = ref(false)
 const selectFilterMode = ref("時間")
 const numberArray = ref(Array.from({ length: 100 }, (num, i) => i + 1))
 const availableFile = ref([{ label: "MS-Word文件檔" }, { label: "MS-Excel文件檔" }, { label: "MS-Power Point文件檔" }, { label: "OpenDocument文件檔（含ODT、ODP、ODS）" },
 { label: "HTML網頁檔" }, { label: "PDF列印檔（Portable Document Format）" }, { label: "ZIP壓縮檔" }, { label: "不限" }])
-const searchStep = ref(0)
-const permissions: { [key: number]: boolean } = {}
-const savedRequest = ref({});
-const ruleForm = reactive<RuleForm>({
-    searchMode: '0',
-    searchRange: "all",
-    count: 10,
-    date1: '',
-    date2: '',
-    delivery: false,
-    type: [],
-    resource: '',
-    desc: '',
-})
 const checkIndexPool: { [key: string]: boolean } = {};
 const checkFileTypePool: { [key: string]: boolean } = {};
 
@@ -358,19 +333,5 @@ const router = useRouter();
 const navigateToUserCreate = () =>{
     router.push('/user')
 }
-//
-function checkFileType(itemFile: any) {
-    if (itemFile.label === "不限" && selected.value.includes("不限")) {
-        selected.value = ["不限"];
-    }
-    else if (itemFile.label !== "不限") {
-        let index = selected.value.indexOf("不限");
-        if (index >= 0) {
-            selected.value.splice(index, 1)
-        }
-    }
-}
-function advSearchToggle(toggle: boolean) {
-    advToggle.value = false
-}
+
 </script>

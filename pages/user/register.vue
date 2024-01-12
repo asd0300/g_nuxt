@@ -3,8 +3,8 @@
         <v-card class="position-absolute d-flex align-center justify-center w-100 h-100">
             <v-sheet width="300" class="mx-auto">
                 <v-form @submit.prevent>
-                    <v-text-field v-model="email" label="email" :rules="[rules.required, rules.counter, rules.email]"></v-text-field>
-                    <v-text-field v-model="password" label="password" :type="show1 ? 'text' : 'password'"
+                    <v-text-field v-model="email" name="email" label="email" :rules="[rules.required, rules.counter, rules.email]"></v-text-field>
+                    <v-text-field v-model="password" name="password" label="password" :type="show1 ? 'text' : 'password'"
                         hint="At least 8 characters"></v-text-field>
                     <v-btn type="submit" block class="mt-2" @click="Create">Submit</v-btn>
                 </v-form>
@@ -23,6 +23,7 @@ const IsSuccessCreate = ref(false)
 const IsFalseCreate = ref(false)
 const password = ref("")
 const email = ref("")
+const config = useRuntimeConfig()
 const rules = {
     required: value => !!value || 'Required.',
     counter: value => value.length <= 20 || 'Max 20 characters',
@@ -32,7 +33,7 @@ const rules = {
     },
 };
 async function Create() {
-    const { data: responseData, error: err } = await useFetch('http://localhost:4000/v1/user/register', {
+    const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/user/register`, {
         method: 'post',
         body: {
             email: email,
