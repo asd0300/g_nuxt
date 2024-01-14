@@ -10,7 +10,7 @@
                     <v-text-field v-model="newPrice" label="ProductNewPrice"
                     :rules="[rules.counter]"></v-text-field>
                     <v-file-input ref="titleFiles" :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp" placeholder="Title pic"
-                        prepend-icon="mdi-camera" label="Title picture" @change="previewFiles"></v-file-input>
+                        prepend-icon="mdi-camera" label="Titlepicture" @change="previewFiles"></v-file-input>
                     <v-file-input ref="detailFiles" multiple :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp"
                         placeholder="detail pic" prepend-icon="mdi-camera" label="detail pictures" ></v-file-input>
                     <v-btn type="submit" block class="mt-2" @click="Create">Submit</v-btn>
@@ -25,7 +25,7 @@
     </div>
 </template>
 <script setup lang="ts">
-const titleImg = ref("null")
+const titleImg = ref("")
 const detailPics = ref("null")
 const FalseMessage = ref("")
 const IsSuccessCreate = ref(false)
@@ -45,17 +45,20 @@ const rules = {
         return pattern.test(value) || 'Invalid e-mail.'
     },
 }
-const previewFiles = (event: Event)=>{
-    const [_file] = (event.target as HTMLInputElement).files as FileList;
-    file.value = _file
+const previewFiles = (event:any)=>{
+    let rawImg:string | ArrayBuffer | null
     // titleImg.value = event.target.files[0]
+    const file = event.target.files[0]
 
-    // const reader = new FileReader()
-    //   reader.onload = (event) => {
-    //     var preview= event.target.result
-    //     var thumbnail = event.target.result.split(',')[1] // 获取base64编码
-    // }
-    // reader.readAsDataURL(file)
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+    rawImg = reader.result;
+    console.log(rawImg);
+    titleImg.value =rawImg as string
+    }
+    reader.readAsDataURL(file);
+    
 }
 
 // const getBase64 = (file: globalThis.Ref<string>) => {
@@ -77,12 +80,13 @@ async function Create() {
     formData.append('title', titleName.value);
     formData.append('price', (price.value).toString());
     formData.append('newprice', (newPrice.value).toString());
-    if(file.value != null){
-        formData.append('titlepic', (file.value).toString());    
-    }
-    formData.append('otherpic',"");
+    formData.append('titlePic', (titleImg.value).toString());
+    // if(file.value != null){
+    //     formData.append('titlepic', (file.value).toString());    
+    // }
+    // formData.append('otherpic',"");
     
-    console.log("123")
+    // console.log("123")
     const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products/`, {
         method: 'post',
         body: formData

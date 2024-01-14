@@ -87,7 +87,7 @@
                     </v-col>
                     <v-col>
                         <div class="block no_result text_center" id="no_result" v-show="!IsSearchSuccessResponse">
-                            <v-btn v-for="item in 4" class="mx-2">item</v-btn>
+                            <v-btn v-for="item in productitems" class="mx-2">{{ item.price }}</v-btn>
                         </div>
                     </v-col>
                 </v-row>
@@ -249,14 +249,15 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
-import { type ResponseData} from '~/Interface/SearchInterface'
-import jwt from 'jsonwebtoken'
+import { type Product, type ResponseData} from '~/Interface/SearchInterface'
+// import jwt from 'jsonwebtoken'
 onMounted(async () => {
     GetUserName()
+    await FetchData()
 });
 function GetUserName(){
     var userToken = useCookie("userToken")
-    const decodedToken = jwt.verify(userToken, "your-secret-key");
+    // const decodedToken = jwt.verify(userToken, "your-secret-key");
 
 }
 const test = [
@@ -282,6 +283,7 @@ const secondSearch = ref("")
 const keywordSearch = ref('')
 const isEditing = ref(false)
 const advToggle = ref(false)
+const productitems = ref<Product[]>([])
 const select = ref(1)
 const selected = ref<String[]>([])
 const typeCheckList = ref<String[]>([])
@@ -333,5 +335,16 @@ const router = useRouter();
 const navigateToUserCreate = () =>{
     router.push('/user')
 }
-
+const FetchData = async () => {
+  try {
+    productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`)
+    // if (response.error) {
+    //   console.error('Error fetching data:', response.error)
+    // } else {
+    //     productitems.value = response.value
+    // }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+  }
+}
 </script>

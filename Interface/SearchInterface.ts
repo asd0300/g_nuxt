@@ -46,3 +46,13 @@ export interface ResponseData{
 interface data{
     token: string
 }
+
+export interface Product{
+    id:number,
+    title:string,
+    price:number,
+    titlepic:string,
+    otherpic:string,
+    newprice:number,
+    createDate: Date
+}
