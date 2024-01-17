@@ -2,29 +2,43 @@
     <div>
         <v-card>
             <v-card-title class="text-h5 font-weight-regular bg-blue-grey">
-                <v-row>
+                <v-row style="background-color: pink;">
                     <v-col>
                         Profile
                     </v-col>
                     <v-col :offset="6">
                         <div>
-                            <v-dialog width="500">
-                                <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" text="登入"> </v-btn>
-                                </template>
-
-                                <template v-slot:default="{ isActive }">
-                                    <v-card v-show="IsLogin" title="">
-                                        <v-card-text>
-                                        </v-card-text>
-                                        <v-card-actions>
-                                            <v-spacer></v-spacer>
-
-                                            <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn>
-                                        </v-card-actions>
-                                    </v-card>
-                                </template>
-                            </v-dialog>
+                            <v-div v-show="!IsLogin">
+                                <v-dialog width="500">
+                                    <template v-slot:activator="{ props }">
+                                        <v-btn v-bind="props" text="登入"> </v-btn>
+                                    </template>
+                                    <template v-slot:default="{ isActive }">
+                                        <v-card width="auto" height="500">
+                                            <v-card-text>
+                                                <div v-show="LoginOrRegister">
+                                                    <Login />
+                                                    <v-btn @click="LoginOrRegister = !LoginOrRegister">前往註冊</v-btn>
+                                                </div>
+                                                <div v-show="!LoginOrRegister">
+                                                    <Register />
+                                                    <v-btn @click="LoginOrRegister = !LoginOrRegister">前往登入</v-btn>
+                                                </div>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn>
+                                            </v-card-actions>
+                                        </v-card>
+                                    </template>
+                                </v-dialog>
+                            </v-div>
+                            <v-btn v-show="IsLogin">
+                                welcome back, {{ loginUserName }}
+                            </v-btn>
+                            <v-badge :content="1">
+                                <v-icon :icon="'mdi-cart-outline'" size="small" @click="ShowCartStatus()" ></v-icon>
+                            </v-badge>
                         </div>
                     </v-col>
                 </v-row>
@@ -81,15 +95,6 @@
                     </v-row>
                 </v-form>
                 <v-row>
-                    <v-col cols="1">
-                        <p>熱門查詢詞:</p>
-
-                    </v-col>
-                    <v-col>
-                        <div class="block no_result text_center" id="no_result" v-show="!IsSearchSuccessResponse">
-                            <v-btn v-for="item in productitems" class="mx-2">{{ item.price }}</v-btn>
-                        </div>
-                    </v-col>
                 </v-row>
             </v-card-text>
             <v-card-text v-show="false">
@@ -129,13 +134,7 @@
                                                     </v-expansion-panel-title>
                                                     <v-expansion-panel-text>
                                                         <div class="d-flex flex-column mb-6">
-                                                            <v-checkbox v-for="item in test" v-model="typeCheckList"
-                                                                :label="item.indexName">
-                                                                <template v-slot:label>
-                                                                    {{ item.indexName }}
-                                                                    <span style="color: red;">({{ item.searchNum }})</span>
-                                                                </template>
-                                                            </v-checkbox>
+
                                                         </div>
                                                     </v-expansion-panel-text>
                                                 </v-expansion-panel>
@@ -157,13 +156,7 @@
                                                     </v-expansion-panel-title>
                                                     <v-expansion-panel-text>
                                                         <div class="d-flex flex-column mb-6">
-                                                            <v-checkbox v-for="item in test" v-model="sourceCheckList"
-                                                                :label="item.indexName">
-                                                                <template v-slot:label>
-                                                                    {{ item.indexName }}
-                                                                    <span style="color: red;">({{ item.searchNum }})</span>
-                                                                </template>
-                                                            </v-checkbox>
+
                                                         </div>
                                                     </v-expansion-panel-text>
                                                 </v-expansion-panel>
@@ -196,28 +189,27 @@
                                     </v-row>
                                 </v-col>
                                 <v-row>
-                                    <v-col cols="11">
-                                        <v-card style="margin: 10px;" v-for="(item, index) in test">
+                                    <v-col cols="3" v-for="product in productitems" :key="product.title">
+                                        <v-card>
+                                            <v-img :src="product.titlepic" class="align-end"
+                                                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px" cover>                                            
+                                            </v-img>
+                                            <v-card-text>
+                                                <div>{{ product.title }}</div>
+                                                <div class="text-decoration-line-through">NT${{ product.price }}</div>
+                                                <div style="color: red;">NT${{ product.newprice }}</div>
+                                            </v-card-text>
+                                            <v-card-actions>
+                                                <v-spacer></v-spacer>
+                                                <v-btn size="small" color="surface-variant" variant="text"
+                                                    icon="mdi-heart"></v-btn>
 
-                                            <div class="d-flex flex-row mb-1">
-                                                <p class="ma-2 pa-2" v-if="(index + 1) % 2 !== 0" style="color: orange;">{{
-                                                    index + 1 }}</p>
-                                                <p class="ma-2 pa-2" v-else style="color: blue;">{{ index + 1 }}</p>
-                                                <div class="ma-2 pa-2">
-                                                    <div class="ma-2 pa-2">
-                                                        [標題] <a href="123" class="ma-2 pa-2">{{ item.indexName }}</a>
-                                                    </div>
-                                                    <div class="ma-2 pa-2">
-                                                        [檔案類型]
-                                                    </div>
-                                                    <div class="ma-2 pa-2">
-                                                        [時間]
-                                                    </div>
-                                                    <div class="ma-2 pa-2">
-                                                        [內容摘要]
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                <v-btn size="small" color="surface-variant" variant="text"
+                                                    icon="mdi-cart-outline" @click=""></v-btn>
+
+                                                <v-btn size="small" color="surface-variant" variant="text"
+                                                    icon="mdi-share-variant"></v-btn>
+                                            </v-card-actions>
                                         </v-card>
                                     </v-col>
                                 </v-row>
@@ -227,56 +219,33 @@
                 </div>
             </v-card-text>
         </v-card>
-        <div class="text-center">
-            <v-container>
-                <v-row justify="center">
-                    <v-col cols="8">
-                        <v-container class="max-width">
-                            <v-pagination v-model="itemsOnPage" class="my-4" :length="itemsOnPage"></v-pagination>
-                        </v-container>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </div>
         <v-alert v-model="IsEmptyAlert" text="查詢句不可為空" type="error" variant="tonal" closable
             close-label="Close Alert"></v-alert>
         <v-alert v-model="IsNotLogin" :text="LoginFailMessage" type="error" variant="tonal" closable
             close-label="Close Alert"></v-alert>
-        <v-alert v-model="IsLogin" text="登入成功" type="success" variant="tonal" closable
-            close-label="Close Alert"></v-alert>
+        <!-- <v-alert v-model="showLoginMessage" text="登入成功" type="success" variant="tonal" closable
+            close-label="Close Alert"></v-alert> -->
     </div>
 </template>
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
-import { type Product, type ResponseData} from '~/Interface/SearchInterface'
-// import jwt from 'jsonwebtoken'
+import { type Product, type ResponseData } from '~/Interface/SearchInterface'
+import Login from '~/pages/user/login.vue'
+import Register from '~/pages/user/register.vue'
+import { jwtDecode } from "jwt-decode";
+import Cookies from 'js-cookie'
 onMounted(async () => {
-    GetUserName()
+    await GetUserName()
     await FetchData()
 });
-function GetUserName(){
-    var userToken = useCookie("userToken")
-    // const decodedToken = jwt.verify(userToken, "your-secret-key");
-
-}
-const test = [
-    {
-        "indexName": "BookComTw",
-        "searchNum": 162
-    },
-    {
-        "indexName": "BookComTw2",
-        "searchNum": 163
-    },
-    {
-        "indexName": "BookComTw2",
-        "searchNum": 163
-    }]
+const LoginOrRegister = ref(true)
 const runtimeCon = useRuntimeConfig()
 const IsLogin = ref(false)
+const showLoginMessage = ref(false)
 const IsNotLogin = ref(false)
-const LoginFailMessage=ref("")
+const LoginFailMessage = ref("")
+const loginUserName = ref("")
 const username = ref("")
 const password = ref("")
 const secondSearch = ref("")
@@ -311,40 +280,40 @@ const itemsOnPage = ref(1)
 //alert
 const IsEmptyAlert = ref(false)
 const alertMessage = ref("")
-async function login() {
-    const { data: responseData, error: err } = await useFetch<ResponseData>(`${runtimeCon.public.hostDev}/user/login`, {
-        method: 'post',
-        body: {
-            name: username,
-            password: password
-        }
-    })
-    if (err.value != null) {
-        IsNotLogin.value = true
-        LoginFailMessage.value = err.value.data.error
-        return
-    }
-    const cookie = useCookie("token")
-    // const count = useCookie("counter",{maxAge:60})
-    // count.value = Math.round(Math.random()*1000)
-    var test = responseData.value?.data.token!
-    cookie.value = test.toString()
-    IsLogin.value = true
-}
 const router = useRouter();
-const navigateToUserCreate = () =>{
+const navigateToUserCreate = () => {
     router.push('/user')
 }
+watch(IsLogin, (newvalue, oldvalue) => {
+    if (newvalue == true) {
+        showLoginMessage.value = true
+    }
+});
 const FetchData = async () => {
-  try {
-    productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`)
-    // if (response.error) {
-    //   console.error('Error fetching data:', response.error)
-    // } else {
-    //     productitems.value = response.value
-    // }
-  } catch (error) {
-    console.error('Error fetching data:', error)
-  }
+    try {
+        productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`)
+        // if (response.error) {
+        //   console.error('Error fetching data:', response.error)
+        // } else {
+        //     productitems.value = response.value
+        // }
+    } catch (error) {
+        console.error('Error fetching data:', error)
+    }
+}
+async function GetUserName() {
+    const cookieValue = Cookies.get('userToken');
+    if (cookieValue != null) {
+        console.log(cookieValue)
+        console.log("解析后的token：", jwtDecode(cookieValue).username)
+        IsLogin.value = true
+        loginUserName.value = jwtDecode(cookieValue).username
+    }
+    else {
+        console.log("Can't find token")
+    }
+}
+function ShowCartStatus(){
+    console.log("check cart")
 }
 </script>

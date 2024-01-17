@@ -3,17 +3,18 @@
         <v-card class="position-absolute d-flex align-center justify-center w-100 h-100">
             <v-sheet width="300" class="mx-auto">
                 <v-form @submit.prevent>
+                    <v-div>登入</v-div>
                     <v-text-field v-model="email" label="email" :rules="[rules.required, rules.counter, rules.email]"></v-text-field>
                     <v-text-field v-model="password" label="password" :type="show1 ? 'text' : 'password'"
                         hint="At least 8 characters"></v-text-field>
                     <v-btn type="submit" block class="mt-2" @click="Login">Submit</v-btn>
                 </v-form>
-                <v-btn  block class="mt-2" @click="navigateToHome">前往首頁</v-btn>
+                <!-- <v-btn  block class="mt-2" @click="navigateToHome">前往首頁</v-btn> -->
             </v-sheet>
         </v-card>
         <v-alert v-model="IsFalseCreate" :text="FalseMessage" type="error" variant="tonal" closable
             close-label="Close Alert"></v-alert>
-        <v-alert v-model="IsSuccessCreate" text="註冊成功" type="success" variant="tonal" closable
+        <v-alert v-model="IsSuccessCreate" text="登入成功" type="success" variant="tonal" closable
             close-label="Close Alert"></v-alert>
     </div>
 </template>

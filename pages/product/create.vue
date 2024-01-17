@@ -25,6 +25,9 @@
     </div>
 </template>
 <script setup lang="ts">
+definePageMeta({
+  middleware: ['auth']
+})
 const titleImg = ref("")
 const detailPics = ref("null")
 const FalseMessage = ref("")
@@ -60,21 +63,6 @@ const previewFiles = (event:any)=>{
     reader.readAsDataURL(file);
     
 }
-
-// const getBase64 = (file: globalThis.Ref<string>) => {
-//     return new Promise((resolve, reject) => {
-//         const reader = new FileReader();
-//         reader.readAsDataURL(file.value);
-//         reader.onload = () => resolve(reader.result);
-//         reader.onerror = (error) => reject(error);
-//     });
-// };
-// const previewFilesDetail = (event: { target: { files: string; }; })=>{
-//     detailPics.value = event.target.files
-//     if(detailPics){
-//         picDetailBase64.value = getBase64(detailPics)
-//     }
-// }
 async function Create() {
     let formData = new FormData();
     formData.append('title', titleName.value);
