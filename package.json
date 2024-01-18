@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@types/js-cookie": "^3.0.6",
     "nuxt": "^3.8.2",
     "vite-plugin-vuetify": "^2.0.1",
     "vue": "^3.3.12",

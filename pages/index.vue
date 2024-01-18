@@ -264,7 +264,7 @@ const availableFile = ref([{ label: "MS-Word文件檔" }, { label: "MS-Excel文�
 { label: "HTML網頁檔" }, { label: "PDF列印檔（Portable Document Format）" }, { label: "ZIP壓縮檔" }, { label: "不限" }])
 const checkIndexPool: { [key: string]: boolean } = {};
 const checkFileTypePool: { [key: string]: boolean } = {};
-
+const cookieValue = ref("")
 const rules = {
     required: (value: any) => !!value || 'Required.',
     counter: (value: string | any[]) => value.length != 20 || 'Max 20 characters',
@@ -291,7 +291,15 @@ watch(IsLogin, (newvalue, oldvalue) => {
 });
 const FetchData = async () => {
     try {
-        productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`)
+        productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`,
+        {
+            headers:{
+
+                'userToken': cookieValue.value
+            }
+        }
+            
+        )
         // if (response.error) {
         //   console.error('Error fetching data:', response.error)
         // } else {
@@ -302,12 +310,12 @@ const FetchData = async () => {
     }
 }
 async function GetUserName() {
-    const cookieValue = Cookies.get('userToken');
+    cookieValue.value = Cookies.get('userToken');
     if (cookieValue != null) {
         console.log(cookieValue)
-        console.log("解析后的token：", jwtDecode(cookieValue).username)
+        console.log("解析后的token：", jwtDecode(cookieValue.value).username)
         IsLogin.value = true
-        loginUserName.value = jwtDecode(cookieValue).username
+        loginUserName.value = jwtDecode(cookieValue.value).username
     }
     else {
         console.log("Can't find token")
