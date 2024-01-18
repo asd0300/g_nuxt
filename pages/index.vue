@@ -105,7 +105,7 @@
             <v-card-text v-show="true">
                 <div class="block no_result text_center" id="no_result" v-show="!IsSearchSuccessResponse">
                     <v-row>
-                        <v-col cols="3">
+                        <v-col cols="2">
                             <v-card>
                                 <v-card-title>
                                     篩選條件
@@ -189,11 +189,13 @@
                                     </v-row>
                                 </v-col>
                                 <v-row>
-                                    <v-col cols="3" v-for="product in productitems" :key="product.title">
+                                    <v-col cols="2" v-for="product in productitems" :key="product.title">
                                         <v-card>
-                                            <v-img :src="product.titlepic" class="align-end"
-                                                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px" cover>                                            
-                                            </v-img>
+                                                <v-img :src="product.titlepic" class="align-end"
+                                                    gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px" cover
+                                                    @click="Direct(product)"
+                                                    >
+                                                </v-img>
                                             <v-card-text>
                                                 <div>{{ product.title }}</div>
                                                 <div class="text-decoration-line-through">NT${{ product.price }}</div>
@@ -323,5 +325,11 @@ async function GetUserName() {
 }
 function ShowCartStatus(){
     console.log("check cart")
+}
+function Direct(item :Product){
+    console.log(item)
+    router.push("/product/"+item.id)
+    // var url = "product/"+id.toString()
+    // router.push(url)
 }
 </script>
