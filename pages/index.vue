@@ -1,7 +1,7 @@
 <template>
     <div>
         <v-card>
-            <v-card-title class="text-h5 font-weight-regular bg-blue-grey">
+            <!-- <v-card-title class="text-h5 font-weight-regular bg-blue-grey">
                 <v-row style="background-color: pink;">
                     <v-col>
                         Profile
@@ -42,7 +42,7 @@
                         </div>
                     </v-col>
                 </v-row>
-            </v-card-title>
+            </v-card-title> -->
             <v-card-text>
                 <v-form>
                     <v-row>
@@ -235,10 +235,10 @@ import { reactive, ref } from 'vue';
 import { type Product, type ResponseData } from '~/Interface/SearchInterface'
 import Login from '~/pages/user/login.vue'
 import Register from '~/pages/user/register.vue'
-import { jwtDecode } from "jwt-decode";
-import Cookies from 'js-cookie'
+import {loginServiceStore} from '@/stores/loginService'
+const loginService = loginServiceStore()
 onMounted(async () => {
-    await GetUserName()
+    // await GetUserName()
     await FetchData()
 });
 const LoginOrRegister = ref(true)
@@ -247,9 +247,6 @@ const IsLogin = ref(false)
 const showLoginMessage = ref(false)
 const IsNotLogin = ref(false)
 const LoginFailMessage = ref("")
-const loginUserName = ref("")
-const username = ref("")
-const password = ref("")
 const secondSearch = ref("")
 const keywordSearch = ref('')
 const isEditing = ref(false)
@@ -297,39 +294,17 @@ const FetchData = async () => {
         {
             headers:{
 
-                'userToken': cookieValue.value
+                'userToken': loginService.cookieValue
             }
         }
             
         )
-        // if (response.error) {
-        //   console.error('Error fetching data:', response.error)
-        // } else {
-        //     productitems.value = response.value
-        // }
     } catch (error) {
         console.error('Error fetching data:', error)
     }
 }
-async function GetUserName() {
-    cookieValue.value = Cookies.get('userToken');
-    if (cookieValue != null) {
-        console.log(cookieValue)
-        console.log("解析后的token：", jwtDecode(cookieValue.value).username)
-        IsLogin.value = true
-        loginUserName.value = jwtDecode(cookieValue.value).username
-    }
-    else {
-        console.log("Can't find token")
-    }
-}
-function ShowCartStatus(){
-    console.log("check cart")
-}
 function Direct(item :Product){
     console.log(item)
     router.push("/product/"+item.id)
-    // var url = "product/"+id.toString()
-    // router.push(url)
 }
 </script>

@@ -11,8 +11,10 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@pinia/nuxt": "^0.5.1",
     "@types/js-cookie": "^3.0.6",
     "nuxt": "^3.8.2",
+    "pinia": "^2.1.7",
     "vite-plugin-vuetify": "^2.0.1",
     "vue": "^3.3.12",
     "vue-router": "^4.2.5",
