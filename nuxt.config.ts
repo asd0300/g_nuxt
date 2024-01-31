@@ -28,13 +28,13 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public:{
-      hostDev: "http://localhost:4000"
+      hostDev: process.env.Backend
     }
   },
   nitro: {
       devProxy: {
           '/api': {
-              target: 'http://127.0.0.1:4000',
+              target: `${process.env.Backend}.:4000`,
               changeOrigin: true,
               prependPath: true,
           },

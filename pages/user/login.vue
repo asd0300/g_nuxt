@@ -19,6 +19,7 @@
     </div>
 </template>
 <script setup>
+import {encrypt} from '@/Interface/UserInterface'
 const FalseMessage = ref("")
 const IsSuccessCreate = ref(false)
 const IsFalseCreate = ref(false)
@@ -35,11 +36,12 @@ const rules = {
     },
 };
 async function Login() {
+    var encryPass = encrypt(password.value)
     const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/user/login`, {
         method: 'post',
         body: {
             email: email,
-            password: password
+            password: encryPass
         }
     })
     if(err.value!= null){
@@ -49,10 +51,23 @@ async function Login() {
     if(responseData.value!=null){
         IsSuccessCreate.value = true
         userToken.value = responseData.value.jwt
+        ReloadWindow()
     }
 }
 const router = useRouter();
 const navigateToHome = () =>{
     router.push('/')
 }
+const ReloadWindow= ()=>{
+    window.location.reload();
+}
+
+// function encrypt (data) {
+//   var KEY="qazxswedcvfrtgbn"
+//   var IV="qazxswedcvfrtgbn"
+//   const key = enc.Utf8.parse(KEY)// 自訂 key
+//   const iv = enc.Utf8.parse(IV)// 自訂 iv
+//   const encrypted = AES.encrypt(data, key, { iv })
+//   return encrypted.toString()
+// }
 </script>

@@ -4,7 +4,8 @@ import Cookies from 'js-cookie'
 export const loginServiceStore = defineStore('token', {
     state: () => ({ cookieValue: "", 
         loginUserName: "",
-        IsLogin: false }),
+        IsLogin: false,
+        loginId:0 }),
     actions: {
         GetUserName(){
             this.cookieValue = Cookies.get('userToken')
@@ -12,7 +13,9 @@ export const loginServiceStore = defineStore('token', {
                 console.log(this.cookieValue)
                 console.log("解析后的token：", jwtDecode(this.cookieValue).username)
                 this.IsLogin = true
-                this.loginUserName = jwtDecode(this.cookieValue).username
+                var cookie = jwtDecode(this.cookieValue).username
+                this.loginUserName = cookie.split(",")[1]
+                this.loginId = cookie.split(",")[0]
             }
             else {
                 console.log("Can't find token")

@@ -1,48 +1,6 @@
 <template>
     <div>
         <v-card>
-            <!-- <v-card-title class="text-h5 font-weight-regular bg-blue-grey">
-                <v-row style="background-color: pink;">
-                    <v-col>
-                        Profile
-                    </v-col>
-                    <v-col :offset="6">
-                        <div>
-                            <v-div v-show="!IsLogin">
-                                <v-dialog width="500">
-                                    <template v-slot:activator="{ props }">
-                                        <v-btn v-bind="props" text="登入"> </v-btn>
-                                    </template>
-                                    <template v-slot:default="{ isActive }">
-                                        <v-card width="auto" height="500">
-                                            <v-card-text>
-                                                <div v-show="LoginOrRegister">
-                                                    <Login />
-                                                    <v-btn @click="LoginOrRegister = !LoginOrRegister">前往註冊</v-btn>
-                                                </div>
-                                                <div v-show="!LoginOrRegister">
-                                                    <Register />
-                                                    <v-btn @click="LoginOrRegister = !LoginOrRegister">前往登入</v-btn>
-                                                </div>
-                                            </v-card-text>
-                                            <v-card-actions>
-                                                <v-spacer></v-spacer>
-                                                <v-btn text="Close Dialog" @click="isActive.value = false"></v-btn>
-                                            </v-card-actions>
-                                        </v-card>
-                                    </template>
-                                </v-dialog>
-                            </v-div>
-                            <v-btn v-show="IsLogin">
-                                welcome back, {{ loginUserName }}
-                            </v-btn>
-                            <v-badge :content="1">
-                                <v-icon :icon="'mdi-cart-outline'" size="small" @click="ShowCartStatus()" ></v-icon>
-                            </v-badge>
-                        </div>
-                    </v-col>
-                </v-row>
-            </v-card-title> -->
             <v-card-text>
                 <v-form>
                     <v-row>
@@ -53,7 +11,7 @@
                         </v-col>
                         <v-col cols="1">
                             <v-icon :key="`icon-${isEditing}`" :color="isEditing ? 'success' : 'info'" :icon="'mdi-magnify'"
-                                size="x-large" @click=""></v-icon>
+                                size="x-large" @click="SearchProduct(keywordSearch)"></v-icon>
                         </v-col>
                         <v-col>
                             <v-btn append-icon="$vuetify" variant="tonal" @click="advToggle = !advToggle">
@@ -171,7 +129,7 @@
                                 <v-col cols="3">
                                     <v-row>
                                         <div :class="['text-h5', 'pa-2']">共有<strong
-                                                class="text-red-lighten-1">3</strong>個搜尋結果
+                                                class="text-red-lighten-1">{{ productitems.length }}</strong>個搜尋結果
                                         </div>
                                     </v-row>
                                 </v-col>
@@ -189,22 +147,21 @@
                                     </v-row>
                                 </v-col>
                                 <v-row>
-                                    <v-col cols="2" v-for="product in productitems" :key="product.title">
-                                        <v-card>
-                                                <v-img :src="product.titlepic" class="align-end"
-                                                    gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px" cover
-                                                    @click="Direct(product)"
-                                                    >
-                                                </v-img>
+                                    <v-col cols="3" v-for="product in productitems" :key="product.title">
+                                        <v-card height="100%">
+                                            <v-img :src="product.titlepic" class="align-end"
+                                                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="200px" cover
+                                                @click="Direct(product)">
+                                            </v-img>
                                             <v-card-text>
                                                 <div>{{ product.title }}</div>
-                                                <div class="text-decoration-line-through">NT${{ product.price }}</div>
+                                                <div v-show="product.price" class="text-decoration-line-through">NT${{ product.price }}</div>
                                                 <div style="color: red;">NT${{ product.newprice }}</div>
                                             </v-card-text>
                                             <v-card-actions>
                                                 <v-spacer></v-spacer>
                                                 <v-btn size="small" color="surface-variant" variant="text"
-                                                    icon="mdi-heart"></v-btn>
+                                                    icon="mdi-heart" @click="AddFavorite(product.id)"></v-btn>
 
                                                 <v-btn size="small" color="surface-variant" variant="text"
                                                     icon="mdi-cart-outline" @click=""></v-btn>
@@ -235,7 +192,7 @@ import { reactive, ref } from 'vue';
 import { type Product, type ResponseData } from '~/Interface/SearchInterface'
 import Login from '~/pages/user/login.vue'
 import Register from '~/pages/user/register.vue'
-import {loginServiceStore} from '@/stores/loginService'
+import { loginServiceStore } from '@/stores/loginService'
 const loginService = loginServiceStore()
 onMounted(async () => {
     // await GetUserName()
@@ -290,21 +247,39 @@ watch(IsLogin, (newvalue, oldvalue) => {
 });
 const FetchData = async () => {
     try {
+        var temp = loginService.cookieValue
         productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/`,
-        {
-            headers:{
+            {
+                headers: {
 
-                'userToken': loginService.cookieValue
+                    'userToken': loginService.cookieValue
+                }
             }
-        }
-            
+
         )
     } catch (error) {
         console.error('Error fetching data:', error)
     }
 }
-function Direct(item :Product){
+function Direct(item: Product) {
     console.log(item)
-    router.push("/product/"+item.id)
+    router.push("/product/" + item.id)
+}
+async function SearchProduct(name: string) {
+    try {
+        productitems.value = await $fetch<Product[]>(`${runtimeCon.public.hostDev}/v1/products/search/${keywordSearch.value}`,
+            {
+                headers: {
+
+                    'userToken': loginService.cookieValue
+                }
+            });
+    } catch (error) {
+        console.error('An error occurred:', error);
+    }
+}
+
+async function AddFavorite(productId: number){
+    var user =  loginService.loginUserName
 }
 </script>

@@ -1,18 +1,23 @@
 <template>
     <div>
-        <v-card class="position-absolute d-flex align-center justify-center w-100 h-100">
+        <v-card>
             <v-sheet width="300" class="mx-auto">
                 <v-form @submit.prevent>
                     <v-text-field v-model="titleName" label="Title Name"
                         :rules="[rules.required, rules.counter]"></v-text-field>
                     <v-text-field v-model="price" label="ProductPrice"
                         :rules="[rules.required, rules.counter]"></v-text-field>
-                    <v-text-field v-model="newPrice" label="ProductNewPrice"
-                    :rules="[rules.counter]"></v-text-field>
-                    <v-file-input ref="titleFiles" :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp" placeholder="Title pic"
-                        prepend-icon="mdi-camera" label="Titlepicture" @change="previewFiles"></v-file-input>
-                    <v-file-input ref="detailFiles" multiple :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp"
-                        placeholder="detail pic" prepend-icon="mdi-camera" label="detail pictures" ></v-file-input>
+                    <v-text-field v-model="newPrice" label="ProductNewPrice" :rules="[rules.counter]"></v-text-field>
+                    <v-file-input ref="titleFiles" :rules="[rules.volumn]" accept="image/png, image/jpeg, image/bmp"
+                        placeholder="Title pic" prepend-icon="mdi-camera" label="Titlepicture"
+                        @change="previewFiles"></v-file-input>
+                    <v-file-input ref="detailFiles" multiple :rules="[rules.volumn]"
+                        accept="image/png, image/jpeg, image/bmp" placeholder="detail pic" prepend-icon="mdi-camera"
+                        label="detail pictures"></v-file-input>
+                    <v-container fluid>
+                        <v-textarea clearable clear-icon="mdi-close-circle" label="Content"
+                            model-value="Content here"></v-textarea>
+                    </v-container>
                     <v-btn type="submit" block class="mt-2" @click="Create">Submit</v-btn>
                 </v-form>
                 <v-btn block class="mt-2" @click="navigateToHome">前往首頁</v-btn>
@@ -25,9 +30,11 @@
     </div>
 </template>
 <script setup lang="ts">
+import {productStore} from '@/stores/productService'
 definePageMeta({
-  middleware: ['auth']
+    middleware: ['auth']
 })
+const productServicetor = productStore()
 const titleImg = ref("")
 const detailPics = ref("null")
 const FalseMessage = ref("")
@@ -48,17 +55,18 @@ const rules = {
         return pattern.test(value) || 'Invalid e-mail.'
     },
 }
-const previewFiles = (event:any)=>{
-    let rawImg:string | ArrayBuffer | null
+const previewFiles = (event: any) => {
+    let rawImg: string | ArrayBuffer | null
     // titleImg.value = event.target.files[0]
     const file = event.target.files[0]
 
     const reader = new FileReader();
 
     reader.onloadend = () => {
-    rawImg = reader.result;
-    console.log(rawImg);
-    titleImg.value =rawImg as string
+        rawImg = reader.result;
+        console.log(rawImg);
+        titleImg.value = rawImg as string
+        productServicetor.pic = rawImg
     }
     reader.readAsDataURL(file);
     
@@ -69,12 +77,7 @@ async function Create() {
     formData.append('price', (price.value).toString());
     formData.append('newprice', (newPrice.value).toString());
     formData.append('titlePic', (titleImg.value).toString());
-    // if(file.value != null){
-    //     formData.append('titlepic', (file.value).toString());    
-    // }
-    // formData.append('otherpic',"");
-    
-    // console.log("123")
+    formData.append('detailDescript', (titleImg.value).toString());
     const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/products/`, {
         method: 'post',
         body: formData

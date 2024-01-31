@@ -19,6 +19,7 @@
     </div>
 </template>
 <script setup>
+import {encrypt} from '@/Interface/UserInterface'
 const FalseMessage = ref("")
 const IsSuccessCreate = ref(false)
 const IsFalseCreate = ref(false)
@@ -34,11 +35,12 @@ const rules = {
     },
 };
 async function Create() {
+    var encrypass = encrypt(password.value)
     const { data: responseData, error: err } = await useFetch(`${config.public.hostDev}/v1/user/register`, {
         method: 'post',
         body: {
             email: email,
-            password: password
+            password: encrypass
         }
     })
     if(err.value!= null){
