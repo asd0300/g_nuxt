@@ -54,5 +54,6 @@ export interface Product{
     titlepic:string,
     otherpic:string,
     newprice:number,
-    createDate: Date
+    createDate: Date,
+    isFavorite:boolean
 }

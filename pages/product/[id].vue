@@ -1,27 +1,22 @@
 <template>
     <div>
+        <v-alert v-model="IsNotLogin" :text="LoginFailMessage" type="error" variant="tonal" closable
+            close-label="Close Alert"></v-alert>
+        <v-alert v-model="AddNewToCart" :text="AddCartMessage" type="info" variant="tonal" closable
+            close-label="Close Alert"></v-alert>
         <div>
-            trace
+            <!-- trace -->
         </div>
         <v-row>
             <v-col cols="4">
-                123
+                <!-- 123 -->
             </v-col>
-            <!-- <v-col cols="4">
-                <v-window v-model="window" show-arrows>
-                    <v-window-item v-for="n in length" :key="n">
-                        <v-card height="200px" class="d-flex justify-center align-center">
-                            <span class="text-h2">Card {{ n }}</span>
-                        </v-card>
-                    </v-window-item>
-                </v-window>
-            </v-col> -->
             <v-img img></v-img>
             <v-col cols="4">
                 <v-card>
                     <v-img :src="SelectImg"></v-img>
                 </v-card>
-                <v-item-group selected-class="bg-primary">
+                <v-item-group selected-class="bg-primary selected-border">
                     <v-container>
                         <v-row>
                             <v-col v-for="item in pics" :key="item" cols="1" md="4">
@@ -44,21 +39,26 @@
                 <div v-show="!productInfo?.product.newprice">
                     <p>NT${{ productInfo?.product.price }}</p>
                 </div>
-                <p style="color: red;">NT${{ productInfo?.product.newprice }}</p>
-                <div v-for="(item, index) in spec" :key="index">
+                <div v-show="productInfo?.product.newprice != 0">
+                    <p style="color: red;">NT${{ productInfo?.product.newprice }}</p>
+                </div>
+                <!-- spec option -->
+                <!-- <p>{{ selectedItems }}</p> -->
+                <div v-for="(item, index) in spec">
                     <div v-for="(value, key) in item" :key="key">
-                        <!-- item group -->
-                        <p>{{ key }}</p>
-                        <v-item-group mandatory>
+                        <v-item-group mandatory v-model="selectedItems[index]">
                             <v-container>
+                                <p>{{ key }}</p>
                                 <v-row>
                                     <v-col v-for="childitem in value" :key="childitem" cols="12" md="4">
-                                        <v-item v-slot="{ isSelected, toggle }">
+                                        <p>{{ childitem }}</p>
+                                        <v-item v-slot="{ isSelected, toggle }" :value="childitem">
                                             <v-card :color="isSelected ? 'primary' : ''" class="d-flex align-center" dark
-                                                height="50" @click="toggle">
+                                                height="50" @click="HandleClick(childitem, toggle)">
                                                 <v-scroll-y-transition>
                                                     <div class="flex-grow-1 text-center">
                                                         {{ isSelected ? childitem : childitem }}
+
                                                     </div>
                                                 </v-scroll-y-transition>
                                             </v-card>
@@ -71,25 +71,29 @@
                 </div>
                 <!-- 數量 -->
                 <p>數量</p>
-                <v-text-field type="number" min="0" step="any" v-model="number"></v-text-field>
+                <v-text-field type="number" min="1" step="any" v-model="number"></v-text-field>
                 <!-- 特色 -->
                 <v-card>
                     <v-expansion-panels>
-                        <v-expansion-panel title="商品特色" :text="feature">
+                        <v-expansion-panel :value="true" title="商品特色" :text="feature">
                         </v-expansion-panel>
                     </v-expansion-panels>
                 </v-card>
+                <br>
                 <v-btn @click="AddToCart()">放入購物車</v-btn>
             </v-col>
         </v-row>
+        <br>
+        <v-divider></v-divider>
+        <br>
         <v-row style="margin: 100;">
-            <v-col cols="8" offset="2">
+            <v-col cols="6" offset="3">
                 <v-div v-html="content">
                 </v-div>
             </v-col>
         </v-row>
         <!-- 規格 -->
-        <p>商品規格</p>
+        <!-- <p>商品規格</p>
         <v-row>
             <v-col cols="8" offset="2">
                 <v-table>
@@ -114,13 +118,14 @@
                     </tbody>
                 </v-table>
             </v-col>
-        </v-row>
+        </v-row> -->
     </div>
 </template>
 <script lang="ts" setup>
 import { loginServiceStore } from '@/stores/loginService'
 import { GetUser } from '@/Interface/UserInterface';
 import { type ProductIdBack } from '@/Interface/ProductInterface';
+import { type ApiError } from '@/Interface/FetchInfoInterface';
 const route = useRoute()
 const id = route.params.id
 const runtimeCon = useRuntimeConfig()
@@ -128,15 +133,19 @@ const loginService = loginServiceStore()
 const productInfo = ref<ProductIdBack>()
 const window = ref(0)
 const length = ref(3)
-const number = ref(0)
+const number = ref(1)
 const feature = ref("")
 const content = ref("")
 const spec = ref<{ [key: string]: string[] }[]>([])
 const pics = ref<string[]>([])
+const selectedItems = ref<string[]>([])
+const IsNotLogin = ref(false)
+const LoginFailMessage = ref("")
+const AddNewToCart = ref(false)
+const AddCartMessage = ref("")
 onMounted(async () => {
     await GetUser()
     await GetFullProductinfo()
-
 });
 var userid = loginService.loginId
 const SelectImg = ref("")
@@ -148,7 +157,6 @@ async function GetFullProductinfo() {
         productInfo.value = await $fetch<ProductIdBack>(`${runtimeCon.public.hostDev}/v1/products/${id}`,
             {
                 headers: {
-
                     'userToken': loginService.cookieValue
                 }
             });
@@ -179,9 +187,12 @@ async function GetFullProductinfo() {
         feature.value = productInfo.value.productDetail.feature
         var titlepic = productInfo.value.product.titlepic
         pics.value.push(titlepic)
+        SelectImg.value = pics.value[0]
         var otherpic = productInfo.value.product.otherpic
         if (otherpic != undefined && otherpic.split(",").length > 0) {
-            otherpic.split(",").forEach(element => {
+            var otherpics = otherpic.split(",")
+            otherpics = otherpics.filter(item => item !== "");
+            otherpics.forEach(element => {
                 pics.value.push(element)
             });
         }
@@ -209,38 +220,43 @@ async function GetFullProductinfo() {
 }
 async function AddToCart() {
     try {
-        var temp = loginService.cookieValue
-        productInfo.value = await $fetch<ProductIdBack>(`${runtimeCon.public.hostDev}/v1/cart/${userid}`,
+        let formData = new FormData();
+        formData.append('userid', (loginService.loginId).toString());
+        formData.append('productid', (id).toString());
+        formData.append('numberbuy', (number.value).toString());
+        formData.append('spec', (selectedItems.value).toString());
+        productInfo.value = await $fetch(`${runtimeCon.public.hostDev}/v1/carts/`,
             {
                 headers: {
-
                     'userToken': loginService.cookieValue
-                }
+                },
+                method: 'POST',
+                body: formData
             });
-        content.value = productInfo.value.productDetail.content
-        feature.value = productInfo.value.productDetail.feature
-        var op = productInfo.value.productDetail.option
-        if (op != undefined) {
-            var options = op.split(";")
-            options = options.filter(item => item !== "");
-            if (options.length > 0) {
-                options.forEach(element => {
-                    var optionchilds: string[] = element.split(',')
-                    var one = optionchilds[0]
-                    var tempL = []
-                    for (var i = 1; i < optionchilds.length; i++) {
-                        tempL.push(optionchilds[i])
-                    }
-                    var dic = { [one]: tempL }
-                    spec.value.push(dic)
-                });
-            }
+        if(productInfo.value != undefined){
+            AddNewToCart.value = true
+            AddCartMessage.value = "新增商品至購物車"
         }
-    } catch (error) {
-        console.error('An error occurred:', error);
+    } catch (error: unknown) {
+        if ((error as ApiError).status == 401) {
+            LoginFailMessage.value = "請先登入帳號"
+            IsNotLogin.value = true
+            console.error('An error occurred:', error);
+        }
     }
 }
 function SelectItem(item: string) {
     SelectImg.value = item
 }
+function HandleClick(childitem: string, toggle: (() => void) | undefined) {
+    if (toggle != undefined) {
+        toggle()
+    }
+}
 </script>
+<style>
+.v-html-content img {
+    max-width: 100%;
+    height: auto;
+}
+</style>

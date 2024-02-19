@@ -3,7 +3,7 @@
         <v-card-title class="text-h5 font-weight-regular bg-blue-grey">
             <v-row style="background-color: pink;">
                 <v-col>
-                    <v-btn variant="plain" to="/">PoYa</v-btn>
+                    <v-btn size="x-large" variant="plain" @click="NavigateToHome">PoYa</v-btn>
                 </v-col>
                 <v-col :offset="6">
                     <div>
@@ -53,8 +53,8 @@
                                                     {{ loginService.loginUserName }}
                                                 </p>
                                                 <v-divider class="my-3"></v-divider>
-                                                <v-btn rounded variant="text">
-                                                    Edit Account
+                                                <v-btn rounded variant="text" @click="Account()">
+                                                    Account
                                                 </v-btn>
                                                 <v-divider class="my-3"></v-divider>
                                                 <v-btn rounded variant="text" @click="LogOut()">
@@ -66,9 +66,11 @@
                                 </v-menu>
                             </v-row>
                         </v-container>
-                        <v-badge :content="1">
-                            <v-icon :icon="'mdi-cart-outline'" size="small" @click="ShowCartStatus()"></v-icon>
-                        </v-badge>
+                        <v-btn @click="ShowCartStatus()">
+                            <v-icon :icon="'mdi-cart-outline'" size="small">
+                                <v-btn to="/cart"></v-btn>
+                            </v-icon>
+                        </v-btn>
                     </div>
                 </v-col>
             </v-row>
@@ -83,20 +85,34 @@ import Register from '~/pages/user/register.vue'
 const loginService = loginServiceStore()
 const LoginOrRegister = ref(true)
 const fab = ref(true)
+const router = useRouter()
+const route = useRoute()
 onMounted(async () => {
     loginService.GetUserName()
+    // CheckIsLogin()
 });
 
 function LogOut() {
-    const authCookie = useCookie('userToken')
-    authCookie.value = null
-    loginService.GetUserName()
-    window.location.reload();
+    loginService.LogOut()
 }
-const navigateToHome = () =>{
-    if($route == '/'){
+function Account(){
+    router.push('/user/account')
+}
+const NavigateToHome = () => {
+    if (route.path == '/') {
         window.location.reload();
     }
-    router.push('/')
+    else{
+        router.push('/')
+    }
+    
+}
+const ShowCartStatus = () => {
+    router.push('/cart')
+}
+const CheckIsLogin = () => {
+    if(loginService.IsLogin == false && route != '/'){
+        NavigateToHome()
+    }
 }
 </script>

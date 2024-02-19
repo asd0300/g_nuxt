@@ -1,4 +1,5 @@
-import { enc, AES } from 'crypto-js'
+import cryptoJS from 'crypto-js'
+const { enc, AES } = cryptoJS
 import { loginServiceStore } from '@/stores/loginService'
 
 export function encrypt (data:string) {

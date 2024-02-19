@@ -1,11 +1,11 @@
 <template>
     <div>
         <div>
-            <v-breadcrumbs :items="linkItems">
+            <!-- <v-breadcrumbs :items="linkItems">
                 <template v-slot:divider>
                     <v-icon icon="mdi-chevron-right"></v-icon>
                 </template>
-            </v-breadcrumbs>
+            </v-breadcrumbs> -->
         </div>
         <v-row>
             <v-col cols="4">
@@ -150,10 +150,10 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { productStore } from '@/stores/productService'
+import {productServiceStore} from '@/stores/productService'
 import { type PicAndText } from '@/Interface/ProductInterface'
 const payment = ref<String[]>(["POYA支付", "信用卡一次付款", "超商取貨付款", "LINE Pay", "Apple Pay", "街口支付", "Google Pay"])
-const productServicetor = productStore()
+const productServicetor = productServiceStore()
 const route = useRoute()
 const { id } = route.params
 const window = ref(0)

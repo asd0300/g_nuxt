@@ -28,8 +28,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public:{
-      hostDev: process.env.Backend
-    }
+      hostDev: process.env.Backend,
+      StripePk: process.env.StripePK
+    },
+    
   },
   nitro: {
       devProxy: {
