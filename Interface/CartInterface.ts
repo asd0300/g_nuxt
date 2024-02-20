@@ -11,6 +11,8 @@ export interface Cart{
     titlepic:string,
     otherpic:string,
     createdate:Date,
+    cartid:number,
+    ispay:boolean
 }
 export interface BackEndRes{
     clientSecret:string

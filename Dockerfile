@@ -4,6 +4,8 @@ RUN mkdir -p /nuxt-app
 WORKDIR /nuxt-app
 COPY . .
 
+ENV HOST 0.0.0.0
+
 RUN npm ci && npm cache clean --force
 # RUN npx nuxt build --dotenv .\.env.production
  RUN npm run build

@@ -150,7 +150,7 @@ async function Delete(item: Product) {
     let formData = new FormData();
     formData.append('userid', (loginService.loginId).toString());
     formData.append('favoid', (item.id).toString());
-    var result = await $fetch(`${runtimeCon.public.hostDev}/v1/favorite/delete`,
+    var fetchresult = await $fetch(`${runtimeCon.public.hostDev}/v1/favorite/delete`,
         {
             headers: {
                 'userToken': loginService.cookieValue
@@ -159,6 +159,11 @@ async function Delete(item: Product) {
             body: formData
         }
     )
+    if(fetchresult =="success"){
+        result.value = result.value.filter((checkitem)=>{
+            return checkitem.id != item.id 
+        })
+    }
 }
 const router = useRouter();
 onMounted(async () => {
