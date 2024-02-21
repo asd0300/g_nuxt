@@ -32,5 +32,13 @@ export default defineNuxtConfig({
       StripePk: process.env.StripePK
     },
   },
-  
+  nitro: {
+    devProxy: {
+        '/api': {
+            target: `${process.env.Backend}.:4000`,
+            changeOrigin: true,
+            prependPath: true,
+        },
+    }
+},
 })
