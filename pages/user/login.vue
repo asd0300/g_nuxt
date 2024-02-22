@@ -46,7 +46,7 @@ async function Login() {
     })
     if(err.value!= null){
         IsFalseCreate.value = true
-        FalseMessage.value = "登入失敗" + err.value.data.error
+        FalseMessage.value = "登入失敗" + err.value + +" "+err.value.data
     }
     if(responseData.value!=null){
         IsSuccessCreate.value = true

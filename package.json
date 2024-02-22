@@ -5,7 +5,7 @@
   "scripts": {
     "build": "nuxi build --dotenv .env.production",
     "dev": "nuxi dev --dotenv .env -p 3000",
-    "generate": "nuxt generate",
+    "generate": "nuxt generate --dotenv .env.production",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },

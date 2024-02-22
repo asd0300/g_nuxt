@@ -14,7 +14,6 @@
         <v-row v-show="resultCarts.length != 0">
             <v-col cols="7" offset="2">
                 <p>勾選以購買</p>
-                {{ selectCartItem }}
                 <v-div v-for="(item, index,) in resultCarts">
                     <v-card height="175" class="ma-6">
                         <v-row>
@@ -35,7 +34,7 @@
                                 <p v-show="!item.newprice">項目總價格:{{ item.numberbuy * item.price }}</p>
                                 <p v-show="item.newprice">項目折價後總價格:
                                     <span style="color: red;">
-                                        {{ item.numberbuy * item.newprice }}
+                                        NT${{ item.numberbuy * item.newprice }}
                                     </span>
                                 </p>
                             </v-col>

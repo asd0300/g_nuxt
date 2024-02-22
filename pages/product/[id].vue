@@ -225,7 +225,7 @@ async function AddToCart() {
         formData.append('productid', (id).toString());
         formData.append('numberbuy', (number.value).toString());
         formData.append('spec', (selectedItems.value).toString());
-        productInfo.value = await $fetch(`${runtimeCon.public.hostDev}/v1/carts/`,
+        var fetchResult = await $fetch(`${runtimeCon.public.hostDev}/v1/carts/`,
             {
                 headers: {
                     'userToken': loginService.cookieValue
@@ -233,7 +233,7 @@ async function AddToCart() {
                 method: 'POST',
                 body: formData
             });
-        if(productInfo.value != undefined){
+        if(fetchResult=="Success"){
             AddNewToCart.value = true
             AddCartMessage.value = "新增商品至購物車"
         }
