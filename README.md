@@ -1,3 +1,12 @@
+#ENV setting
+參考sample.env.production
+
+        Backend= ##domain name
+        StripePK= ## Stripe PK
+        HOST=0.0.0.0
+        PORT=3000
+並將sample.env.production => .env.production
+
 # Nuxt 3 Minimal Starter
 
 Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
