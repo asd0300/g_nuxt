@@ -45,7 +45,13 @@ async function Create() {
     })
     if(err.value!= null){
         IsFalseCreate.value = true
-        FalseMessage.value = "註冊失敗" + err.value.data.error
+        if(err.value.data.includes("duplicate key value")){
+            FalseMessage.value = "註冊失敗" + " 已存在相同帳號"
+        }
+        else{
+            FalseMessage.value = "註冊失敗" + err.value.data
+        }
+        
     }
     if(responseData.value!=null){
         IsSuccessCreate.value = true
